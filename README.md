@@ -23,3 +23,16 @@ https://github.com/jing332/tts-server-android
 微软Azure接口(延迟高): `http://localhost:1233/api/azure`
 
 Edge大声朗读接口: `http://localhost:1233/api/ra`
+
+修改以支持下载音频文件.作为一个小工具
+编译命令
+```
+GOOS=linux GOARCH=arm64 go build -o tts-server-go-arm64
+```
+```
+GOOS=linux GOARCH=arm GOARM=7 go build -o tts-server-go-arm
+```
+```
+go build -o tts-server-go
+```
+
