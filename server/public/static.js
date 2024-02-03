@@ -68,6 +68,50 @@ function unitConversion(limit) {
     }
     return size;
 }
+/* 下载音频 */
+function downloadAudio() {
+    let headers = {'Content-Type': 'text/plain'};
+    let voiceName = document.getElementsByName('voiceName')[0].value;
+    let previewText = document.getElementsByName('previewText')[0].value;
+    let ssml = createSSML(previewText, voiceName);
+    let voiceFormat = document.getElementsByName('voiceFormat')[0].value;
+    let token = document.getElementsByName('token')[0].value;
+
+    headers['Format'] = voiceFormat;
+    localStorage.setItem("token", token);
+    if (token) headers['Token'] = token;
+
+    fetch('/api/ra', {
+        method: 'post',
+        headers: headers,
+        body: ssml
+    }).then(response => {
+        if (response.status === 200) {
+            return response.blob();
+        } else {
+            return response.text().then(text => Promise.reject(text));
+        }
+    }).then(blob => {
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a link element
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'audio.' + voiceFormat.split('-').pop(); // Set the download filename
+        document.body.appendChild(a);
+
+        // Trigger the click event on the link
+        a.click();
+
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+    }).catch(reason => {
+        alert(reason);
+    });
+}
+
 
 /* 语言选项的汉化 */
 let cnLocalLanguage = {
