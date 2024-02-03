@@ -69,6 +69,7 @@ function unitConversion(limit) {
     return size;
 }
 /* 下载音频 */
+
 function downloadAudio() {
     let headers = {'Content-Type': 'text/plain'};
     let voiceName = document.getElementsByName('voiceName')[0].value;
@@ -99,7 +100,11 @@ function downloadAudio() {
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
-        a.download = 'audio.' + voiceFormat.split('-').pop(); // Set the download filename
+
+        // Decode the filename before setting it
+        const filename = decodeURIComponent(previewText) + '.' + voiceFormat.split('-').pop();
+        a.setAttribute('download', filename);
+
         document.body.appendChild(a);
 
         // Trigger the click event on the link
@@ -110,6 +115,7 @@ function downloadAudio() {
     }).catch(reason => {
         alert(reason);
     });
+	
 }
 
 
