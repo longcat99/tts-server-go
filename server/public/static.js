@@ -71,7 +71,7 @@ function unitConversion(limit) {
 /* 下载音频 */
 
 function downloadAudio() {
-    let headers = { 'Content-Type': 'text/plain' };
+    let headers = {'Content-Type': 'text/plain'};
     let voiceName = document.getElementsByName('voiceName')[0].value;
     let previewText = document.getElementsByName('previewText')[0].value;
     let ssml = createSSML(previewText, voiceName);
@@ -82,49 +82,40 @@ function downloadAudio() {
     localStorage.setItem("token", token);
     if (token) headers['Token'] = token;
 
-    // Function to handle the fetch request
-    function fetchAudio(apiEndpoint) {
-        return fetch(apiEndpoint, {
-            method: 'post',
-            headers: headers,
-            body: ssml
-        }).then(response => {
-            if (response.status === 200) {
-                return response.blob();
-            } else {
-                return response.text().then(text => Promise.reject(text));
-            }
-        });
-    }
+    fetch('/api/ra', {
+        method: 'post',
+        headers: headers,
+        body: ssml
+    }).then(response => {
+        if (response.status === 200) {
+            return response.blob();
+        } else {
+            return response.text().then(text => Promise.reject(text));
+        }
+    }).then(blob => {
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
 
-    // Fetch audio from both endpoints
-    Promise.all([fetchAudio('/api/azure'), fetchAudio('/api/ra')])
-        .then(blobs => {
-            blobs.forEach((blob, index) => {
-                // Create a temporary URL for the blob
-                const url = window.URL.createObjectURL(blob);
+        // Create a link element
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
 
-                // Create a link element
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
+        // Decode the filename before setting it
+        const filename = decodeURIComponent(previewText) + '.' + voiceFormat.split('-').pop();
+        a.setAttribute('download', filename);
 
-                // Decode the filename before setting it
-                const filename = decodeURIComponent(previewText) + (index === 0 ? '_azure' : '_ra') + '.' + voiceFormat.split('-').pop();
-                a.setAttribute('download', filename);
+        document.body.appendChild(a);
 
-                document.body.appendChild(a);
+        // Trigger the click event on the link
+        a.click();
 
-                // Trigger the click event on the link
-                a.click();
-
-                // Cleanup
-                window.URL.revokeObjectURL(url);
-            });
-        })
-        .catch(reason => {
-            alert(reason);
-        });
+        // Cleanup
+        window.URL.revokeObjectURL(url);
+    }).catch(reason => {
+        alert(reason);
+    });
+	
 }
 
 
